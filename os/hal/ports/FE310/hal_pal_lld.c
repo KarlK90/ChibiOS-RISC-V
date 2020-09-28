@@ -51,7 +51,7 @@
 /*===========================================================================*/
 
 /**
- * @brief   STM32 I/O ports configuration.
+ * @brief   GD32 I/O ports configuration.
  *
  * @notapi
  */

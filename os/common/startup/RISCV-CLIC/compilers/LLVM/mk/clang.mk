@@ -2,16 +2,12 @@
 # Compiler settings
 #
 
-TRGT = riscv32-unknown-elf-
-CC   = $(TRGT)gcc
-CPPC = $(TRGT)g++
-# Enable loading with g++ only if you need C++ runtime support.
-# NOTE: You can use C++ even without C++ support if you are careful. C++
-#       runtime support makes code size explode.
-LD   = $(TRGT)gcc
-#LD   = $(TRGT)g++
+TRGT = riscv-none-embed-
+CC   = clang
+CPPC = clang++
+LD   = clang
 CP   = $(TRGT)objcopy
-AS   = $(TRGT)gcc -x assembler-with-cpp
+AS   = $(TRGT)as -x assembler-with-cpp
 AR   = $(TRGT)ar
 OD   = $(TRGT)objdump
 SZ   = $(TRGT)size
