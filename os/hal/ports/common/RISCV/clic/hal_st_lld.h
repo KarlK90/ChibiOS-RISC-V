@@ -90,23 +90,14 @@ void st_lld_init(void);
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline systime_t
-st_lld_get_counter(void) {
-  uint32_t high, low, temp;
-  do {
-    high = RISCV_MTIMEH;
-    low = RISCV_MTIMEL;
-    temp = RISCV_MTIMEH;
-  } while (high != temp);
-
-  return (((systime_t)high) << 32) | (systime_t)low;
-  // while (true) {
-  //   uint32_t mtime_h = RISCV_MTIMEH;
-  //   /* Check if timer wrapping occured while we read the higher bits. */
-  //   if (mtime_h == RISCV_MTIMEH) {
-  //     return ((systime_t)mtime_h << 32) | RISCV_MTIMEL;
-  //   }
-  // }
+static inline systime_t st_lld_get_counter(void) {
+  while (true) {
+    uint32_t mtime_h = RISCV_MTIMEH;
+    /* Check if timer wrapping occured while we read the higher bits. */
+    if (mtime_h == RISCV_MTIMEH) {
+      return ((systime_t)mtime_h << 32) | RISCV_MTIMEL;
+    }
+  }
 }
 
 /**
@@ -118,11 +109,10 @@ st_lld_get_counter(void) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void
-st_lld_start_alarm(systime_t abstime) {
+static inline void st_lld_start_alarm(systime_t abstime) {
   eclic_enable_interrupt(CLIC_INT_TMR);
   eclic_set_level_trig(CLIC_INT_TMR);
-  //eclic_set_irq_lvl_abs(CLIC_INT_TMR, 1);
+  // eclic_set_irq_lvl_abs(CLIC_INT_TMR, 1);
   eclic_set_irq_priority(CLIC_INT_TMR, STM32_ST_IRQ_PRIORITY);
   RISCV_MTIMECMP0 = abstime;
 }
@@ -132,7 +122,7 @@ st_lld_start_alarm(systime_t abstime) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void st_lld_stop_alarm(void) {
+static inline void st_lld_stop_alarm(void) {
   eclic_disable_interrupt(CLIC_INT_TMR);
   RISCV_MTIMECMP0 = (uint32_t)(~0);
 }
@@ -144,8 +134,7 @@ __attribute__((always_inline)) static inline void st_lld_stop_alarm(void) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void
-st_lld_set_alarm(systime_t abstime) {
+static inline void st_lld_set_alarm(systime_t abstime) {
   RISCV_MTIMECMP0 = abstime;
 }
 
@@ -156,7 +145,7 @@ st_lld_set_alarm(systime_t abstime) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline systime_t st_lld_get_alarm(void) {
+static inline systime_t st_lld_get_alarm(void) {
   return (systime_t)RISCV_MTIMECMP0;
 }
 
@@ -169,7 +158,7 @@ __attribute__((always_inline)) static inline systime_t st_lld_get_alarm(void) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline bool st_lld_is_alarm_active(void) {
+static inline bool st_lld_is_alarm_active(void) {
   // return (bool)(1);
   // return false;//todo fix me
   return eclic_is_pending(CLIC_INT_TMR);

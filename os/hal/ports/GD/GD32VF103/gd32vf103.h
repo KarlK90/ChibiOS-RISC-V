@@ -227,7 +227,7 @@ typedef enum IRQn
 // #define CRC_BASE              (AHB1_BUS_BASE + 0x0000B000U)  /*!< CRC base address                 */
 // #define USBFS_BASE            (AHB1_BUS_BASE + 0x0FFE8000U)  /*!< USBFS base address               */
 
-#include "gd32vf103_libopt.h"
+#include "n200_func.h"
 
 #ifdef cplusplus
 }
