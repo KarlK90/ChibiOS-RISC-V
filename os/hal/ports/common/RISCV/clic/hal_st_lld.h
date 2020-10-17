@@ -112,7 +112,6 @@ static inline systime_t st_lld_get_counter(void) {
 static inline void st_lld_start_alarm(systime_t abstime) {
   eclic_enable_interrupt(CLIC_INT_TMR);
   eclic_set_level_trig(CLIC_INT_TMR);
-  // eclic_set_irq_lvl_abs(CLIC_INT_TMR, 1);
   eclic_set_irq_priority(CLIC_INT_TMR, STM32_ST_IRQ_PRIORITY);
   RISCV_MTIMECMP0 = abstime;
 }

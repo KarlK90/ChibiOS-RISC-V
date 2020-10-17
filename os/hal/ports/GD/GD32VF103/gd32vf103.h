@@ -171,14 +171,7 @@ typedef enum IRQn
 } IRQn_Type;
 
 /* includes */
-//#include "system_gd32vf103.h"
 #include <stdint.h>
-
-/* enum definitions */
-//typedef enum {DISABLE = 0, ENABLE = !DISABLE} EventStatus, ControlStatus;
-//typedef enum {FALSE = 0, TRUE = !FALSE} bool;
-//typedef enum {RESET = 0, SET = 1,MAX = 0X7FFFFFFF} FlagStatus;
-//typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrStatus;
 
 /* bit operations */
 #define REG32(addr)                  (*(volatile uint32_t *)(uint32_t)(addr))
@@ -187,45 +180,6 @@ typedef enum IRQn
 #define BIT(x)                       ((uint32_t)((uint32_t)0x01U<<(x)))
 #define BITS(start, end)             ((0xFFFFFFFFUL << (start)) & (0xFFFFFFFFUL >> (31U - (uint32_t)(end)))) 
 #define GET_BITS(regval, start, end) (((regval) & BITS((start),(end))) >> (start))
-
-// /* main flash and SRAM memory map */
-// #define FLASH_BASE            ((uint32_t)0x08000000U)        /*!< main FLASH base address          */
-// #define SRAM_BASE             ((uint32_t)0x20000000U)        /*!< SRAM0 base address               */
-// #define OB_BASE               ((uint32_t)0x1FFFF800U)        /*!< OB base address                  */
-// #define DBG_BASE              ((uint32_t)0xE0042000U)        /*!< DBG base address                 */
-// #define EXMC_BASE             ((uint32_t)0xA0000000U)        /*!< EXMC register base address       */
-
-// /* peripheral memory map */
-// #define APB1_BUS_BASE         ((uint32_t)0x40000000U)        /*!< apb1 base address                */
-// #define APB2_BUS_BASE         ((uint32_t)0x40010000U)        /*!< apb2 base address                */
-// #define AHB1_BUS_BASE         ((uint32_t)0x40018000U)        /*!< ahb1 base address                */
-// #define AHB3_BUS_BASE         ((uint32_t)0x60000000U)        /*!< ahb3 base address                */
-
-// /* advanced peripheral bus 1 memory map */
-// #define TIMER_BASE            (APB1_BUS_BASE + 0x00000000U)  /*!< TIMER base address               */
-// #define RTC_BASE              (APB1_BUS_BASE + 0x00002800U)  /*!< RTC base address                 */
-// #define WWDGT_BASE            (APB1_BUS_BASE + 0x00002C00U)  /*!< WWDGT base address               */
-// #define FWDGT_BASE            (APB1_BUS_BASE + 0x00003000U)  /*!< FWDGT base address               */
-// #define SPI_BASE              (APB1_BUS_BASE + 0x00003800U)  /*!< SPI base address                 */
-// #define USART_BASE            (APB1_BUS_BASE + 0x00004400U)  /*!< USART base address               */
-// #define I2C_BASE              (APB1_BUS_BASE + 0x00005400U)  /*!< I2C base address                 */
-// #define CAN_BASE              (APB1_BUS_BASE + 0x00006400U)  /*!< CAN base address                 */
-// #define BKP_BASE              (APB1_BUS_BASE + 0x00006C00U)  /*!< BKP base address                 */
-// #define PMU_BASE              (APB1_BUS_BASE + 0x00007000U)  /*!< PMU base address                 */
-// #define DAC_BASE              (APB1_BUS_BASE + 0x00007400U)  /*!< DAC base address                 */
-
-// /* advanced peripheral bus 2 memory map */
-// #define AFIO_BASE             (APB2_BUS_BASE + 0x00000000U)  /*!< AFIO base address                */
-// #define EXTI_BASE             (APB2_BUS_BASE + 0x00000400U)  /*!< EXTI base address                */
-// #define GPIO_BASE             (APB2_BUS_BASE + 0x00000800U)  /*!< GPIO base address                */
-// #define ADC_BASE              (APB2_BUS_BASE + 0x00002400U)  /*!< ADC base address                 */
-
-// /* advanced high performance bus 1 memory map */
-// #define DMA_BASE              (AHB1_BUS_BASE + 0x00008000U)  /*!< DMA base address                 */
-// #define RCU_BASE              (AHB1_BUS_BASE + 0x00009000U)  /*!< RCU base address                 */
-// #define FMC_BASE              (AHB1_BUS_BASE + 0x0000A000U)  /*!< FMC base address                 */
-// #define CRC_BASE              (AHB1_BUS_BASE + 0x0000B000U)  /*!< CRC base address                 */
-// #define USBFS_BASE            (AHB1_BUS_BASE + 0x0FFE8000U)  /*!< USBFS base address               */
 
 #include "n200_func.h"
 

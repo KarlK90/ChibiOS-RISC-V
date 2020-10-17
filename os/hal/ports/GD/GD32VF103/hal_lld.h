@@ -210,8 +210,6 @@
 
 /* Various helpers.*/
 #include "nvic.h"
-//#include "cache.h"
-//#include "mpu_v7m.h"
 #include "gd32_isr.h"
 #include "stm32_dma.h"
 #include "stm32_rcc.h"

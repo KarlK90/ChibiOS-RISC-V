@@ -55,21 +55,9 @@
  * @param[in] prio      the interrupt priority
  */
 void nvicEnableVector(uint32_t n, uint32_t prio) {
-
-  //eclic_set_irq_lvl_abs(n, prio);
   eclic_set_irq_priority(n, prio);
   eclic_set_level_trig(n);
-  //eclic_set_posedge_trig(n);
   eclic_enable_interrupt(n);
-  // #if defined(__CORE_CM0_H_GENERIC) || defined(__CORE_CM0PLUS_H_GENERIC)
-  //   NVIC->IP[_IP_IDX(n)] = (NVIC->IP[_IP_IDX(n)] & ~(0xFFU << _BIT_SHIFT(n)))
-  //   |
-  //                          (NVIC_PRIORITY_MASK(prio) << _BIT_SHIFT(n));
-  // #else
-  //   NVIC->IP[n] = NVIC_PRIORITY_MASK(prio);
-  // #endif
-  //   NVIC->ICPR[n >> 5U] = 1U << (n & 0x1FU);
-  //   NVIC->ISER[n >> 5U] = 1U << (n & 0x1FU);
 }
 
 /**
@@ -79,12 +67,6 @@ void nvicEnableVector(uint32_t n, uint32_t prio) {
  */
 void nvicDisableVector(uint32_t n) {
   eclic_disable_interrupt(n);
-  //   NVIC->ICER[n >> 5U] = 1U << (n & 0x1FU);
-  // #if defined(__CORE_CM0_H_GENERIC) || defined(__CORE_CM0PLUS_H_GENERIC)
-  //   NVIC->IP[_IP_IDX(n)] = NVIC->IP[_IP_IDX(n)] & ~(0xFFU << _BIT_SHIFT(n));
-  // #else
-  //   NVIC->IP[n] = 0U;
-  // #endif
 }
 
 /**
@@ -96,17 +78,7 @@ void nvicDisableVector(uint32_t n) {
 void nvicSetSystemHandlerPriority(uint32_t handler, uint32_t prio) {
 
   osalDbgCheck(handler < 12U);
-
-  // #if defined(__CORE_CM0_H_GENERIC)
-  //   SCB->SHP[_SHP_IDX(handler)] = (SCB->SHP[_SHP_IDX(handler)] & ~(0xFFU <<
-  //   _BIT_SHIFT(handler))) |
-  //                                 (NVIC_PRIORITY_MASK(prio) <<
-  //                                 _BIT_SHIFT(handler));
-  // #elif defined(__CORE_CM7_H_GENERIC)
-  //   SCB->SHPR[handler] = NVIC_PRIORITY_MASK(prio);
-  // #else
-  //   SCB->SHP[handler] = NVIC_PRIORITY_MASK(prio);
-  // #endif
+  nvicEnableVector(handler, prio);
 }
 
 /**
@@ -116,7 +88,6 @@ void nvicSetSystemHandlerPriority(uint32_t handler, uint32_t prio) {
  */
 void nvicClearPending(uint32_t n) {
   eclic_clear_pending(n);
-  // NVIC->ICPR[n >> 5] = 1 << (n & 0x1F);
 }
 
 /**
@@ -124,12 +95,7 @@ void nvicClearPending(uint32_t n) {
 \details Initiates a system reset request to reset the MCU.
 */
 __attribute__((noreturn)) /*__STATIC_INLINE */ void NVIC_SystemReset(void) {
-  //eclic_system_reset();
-  // __DSB(); /* Ensure all outstanding memory accesses included
-  //             buffered write are completed before reset */
-  // SCB->AIRCR = ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) | SCB_AIRCR_SYSRESETREQ_Msk);
-  // __DSB(); /* Ensure completion of memory access */
-
+  eclic_system_reset();
   while(1){}
 }
 /** @} */

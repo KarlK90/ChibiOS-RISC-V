@@ -229,11 +229,6 @@ void irqInit(void) {
   max_irqn &= (0x00001FFF);
   // Initialize the 'ECLIC' interrupt controller.
   eclic_init(max_irqn);
-  eclic_global_interrupt_enable();
-  eclic_set_irq_lvl_abs(CLIC_INT_TMR, 1);
-  eclic_set_irq_priority(CLIC_INT_TMR, 1);
-  eclic_set_posedge_trig(CLIC_INT_TMR);
-  eclic_enable_interrupt(CLIC_INT_TMR);
 
 #if HAL_USE_PAL
   nvicEnableVector(EXTI0_IRQn, STM32_IRQ_EXTI0_PRIORITY);
