@@ -22,8 +22,8 @@
  * @{
  */
 
-#include "hal.h"
 #include "gd32vf103_eclic.h"
+#include "hal.h"
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -229,6 +229,7 @@ void irqInit(void) {
   max_irqn &= (0x00001FFF);
   // Initialize the 'ECLIC' interrupt controller.
   eclic_init(max_irqn);
+  eclic_set_nlbits(ECLIC_PRIGROUP_LEVEL4_PRIO0);
 
 #if HAL_USE_PAL
   nvicEnableVector(EXTI0_IRQn, STM32_IRQ_EXTI0_PRIORITY);

@@ -55,9 +55,7 @@
  * @param[in] prio      the interrupt priority
  */
 void nvicEnableVector(uint32_t n, uint32_t prio) {
-  eclic_set_irq_priority(n, prio);
-  eclic_set_level_trig(n);
-  eclic_enable_interrupt(n);
+  eclic_irq_enable(n, prio, 0);
 }
 
 /**
@@ -65,9 +63,7 @@ void nvicEnableVector(uint32_t n, uint32_t prio) {
  *
  * @param[in] n         the interrupt number
  */
-void nvicDisableVector(uint32_t n) {
-  eclic_disable_interrupt(n);
-}
+void nvicDisableVector(uint32_t n) { eclic_irq_disable(n); }
 
 /**
  * @brief   Changes the priority of a system handler.
@@ -86,9 +82,7 @@ void nvicSetSystemHandlerPriority(uint32_t handler, uint32_t prio) {
  *
  * @param[in] n         the interrupt number
  */
-void nvicClearPending(uint32_t n) {
-  eclic_clear_pending(n);
-}
+void nvicClearPending(uint32_t n) { eclic_clear_pending(n); }
 
 /**
 \brief   System Reset
@@ -96,6 +90,7 @@ void nvicClearPending(uint32_t n) {
 */
 __attribute__((noreturn)) /*__STATIC_INLINE */ void NVIC_SystemReset(void) {
   eclic_system_reset();
-  while(1){}
+  while (1) {
+  }
 }
 /** @} */
