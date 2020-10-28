@@ -182,37 +182,37 @@
  *--------------------------------------------------------------------------*/
                 .globl  _port_switch
 _port_switch:
-                sw      ra, -52(sp) //port_intctx
-                sw      s0, -48(sp)
-                sw      s1, -44(sp)
-                sw      s2, -40(sp)
-                sw      s3, -36(sp)
-                sw      s4, -32(sp)
-                sw      s5, -28(sp)
-                sw      s6, -24(sp)
-                sw      s7, -20(sp)
-                sw      s8, -16(sp)
-                sw      s9, -12(sp)
-                sw      s10, -8(sp)
-                sw      s11, -4(sp)
+    STORE      ra, -13*REGBYTES(sp) //port_intctx
+    STORE      s0, -12*REGBYTES(sp)
+    STORE      s1, -11*REGBYTES(sp)
+    STORE      s2, -10*REGBYTES(sp)
+    STORE      s3,  -9*REGBYTES(sp)
+    STORE      s4,  -8*REGBYTES(sp)
+    STORE      s5,  -7*REGBYTES(sp)
+    STORE      s6,  -6*REGBYTES(sp)
+    STORE      s7,  -5*REGBYTES(sp)
+    STORE      s8,  -4*REGBYTES(sp)
+    STORE      s9,  -3*REGBYTES(sp)
+    STORE      s10, -2*REGBYTES(sp)
+    STORE      s11, -1*REGBYTES(sp)
 
-                sw      sp, CONTEXT_OFFSET(a1)
-                lw      sp, CONTEXT_OFFSET(a0)
+    STORE      sp, CONTEXT_OFFSET(a1)
+    LOAD       sp, CONTEXT_OFFSET(a0)
 
-                lw      ra, -52(sp)
-                lw      s0, -48(sp)
-                lw      s1, -44(sp)
-                lw      s2, -40(sp)
-                lw      s3, -36(sp)
-                lw      s4, -32(sp)
-                lw      s5, -28(sp)
-                lw      s6, -24(sp)
-                lw      s7, -20(sp)
-                lw      s8, -16(sp)
-                lw      s9, -12(sp)
-                lw      s10, -8(sp)
-                lw      s11, -4(sp)
-                ret
+    LOAD      ra, -13*REGBYTES(sp)
+    LOAD      s0, -12*REGBYTES(sp)
+    LOAD      s1, -11*REGBYTES(sp)
+    LOAD      s2, -10*REGBYTES(sp)
+    LOAD      s3,  -9*REGBYTES(sp)
+    LOAD      s4,  -8*REGBYTES(sp)
+    LOAD      s5,  -7*REGBYTES(sp)
+    LOAD      s6,  -6*REGBYTES(sp)
+    LOAD      s7,  -5*REGBYTES(sp)
+    LOAD      s8,  -4*REGBYTES(sp)
+    LOAD      s9,  -3*REGBYTES(sp)
+    LOAD      s10, -2*REGBYTES(sp)
+    LOAD      s11, -1*REGBYTES(sp)
+    ret
 
 /*--------------------------------------------------------------------------*
  * Start a thread by invoking its work function.
@@ -222,20 +222,20 @@ _port_switch:
  * register S1 contains the thread parameter. The function chThdExit() is
  * called on thread function return.
  *--------------------------------------------------------------------------*/
-                .globl  _port_thread_start
+.globl  _port_thread_start
 _port_thread_start:
 #if CH_DBG_SYSTEM_STATE_CHECK
-                jal     ra, _dbg_check_unlock
+    jal     ra, _dbg_check_unlock
 #endif
 #if CH_DBG_STATISTICS
-                jal     ra, _stats_stop_measure_crit_thd
+    jal     ra, _stats_stop_measure_crit_thd
 #endif
 
-                csrsi   mstatus, 0x8
-                mv      a0, s1
-                jalr    ra, s0
-                li      a0, 0              /* MSG_OK */
-                jal     ra, chThdExit
+    csrsi   mstatus, 0x8
+    mv      a0, s1
+    jalr    ra, s0
+    li      a0, 0              /* MSG_OK */
+    jal     ra, chThdExit
 _zombies:       j       _zombies
 
 // IRQ entry point
@@ -251,22 +251,22 @@ _irq_handler:
     SAVE_EPC_STATUS
     
     // alle caller save register auf dem stack speichern, eqvlt. zu SAVE_CONTEXT exkl. tp register
-    sw      a0, 0(sp)
-    sw      a1, 4(sp)
-    sw      a2, 8(sp)
-    sw      a3, 12(sp)
-    sw      a4, 16(sp)
-    sw      a5, 20(sp)
-    sw      a6, 24(sp)
-    sw      a7, 28(sp)
-    sw      t0, 32(sp)
-    sw      t1, 36(sp)
-    sw      t2, 40(sp)
-    sw      t3, 44(sp)
-    sw      t4, 48(sp)
-    sw      t5, 52(sp)
-    sw      t6, 56(sp)
-    sw      ra, 60(sp)
+    STORE      a0, 0*REGBYTES(sp)
+    STORE      a1, 1*REGBYTES(sp)
+    STORE      a2, 2*REGBYTES(sp)
+    STORE      a3, 3*REGBYTES(sp)
+    STORE      a4, 4*REGBYTES(sp)
+    STORE      a5, 5*REGBYTES(sp)
+    STORE      a6, 6*REGBYTES(sp)
+    STORE      a7, 7*REGBYTES(sp)
+    STORE      t0, 8*REGBYTES(sp)
+    STORE      t1, 9*REGBYTES(sp)
+    STORE      t2, 10*REGBYTES(sp)
+    STORE      t3, 11*REGBYTES(sp)
+    STORE      t4, 12*REGBYTES(sp)
+    STORE      t5, 13*REGBYTES(sp)
+    STORE      t6, 14*REGBYTES(sp)
+    STORE      ra, 15*REGBYTES(sp)
 
     // The special CSR read/write operation, which is actually Claim the CLIC to
     // find its pending highest ID, if the ID is not 0, then automatically enable
@@ -294,42 +294,42 @@ handle_trap:
 .global _port_switch_from_isr
 _port_switch_from_isr:
 #if CH_DBG_STATISTICS
-                jal     ra, _stats_start_measure_crit_thd
+    jal     ra, _stats_start_measure_crit_thd
 #endif
 #if CH_DBG_SYSTEM_STATE_CHECK
-                jal     ra, _dbg_check_lock
+    jal     ra, _dbg_check_lock
 #endif
-                jal     ra, chSchDoReschedule
+    jal     ra, chSchDoReschedule
 #if CH_DBG_SYSTEM_STATE_CHECK
-                jal     ra, _dbg_check_unlock
+    jal     ra, _dbg_check_unlock
 #endif
 #if CH_DBG_STATISTICS
-                jal     ra, _stats_stop_measure_crit_thd
+    jal     ra, _stats_stop_measure_crit_thd
 #endif
 
 .global _port_exit_from_isr
 _port_exit_from_isr:
-                lw      a0, 0(sp)
-                lw      a1, 4(sp)
-                lw      a2, 8(sp)
-                lw      a3, 12(sp)
-                lw      a4, 16(sp)
-                lw      a5, 20(sp)
-                lw      a6, 24(sp)
-                lw      a7, 28(sp)
-                lw      t0, 32(sp)
-                lw      t1, 36(sp)
-                lw      t2, 40(sp)
-                lw      t3, 44(sp)
-                lw      t4, 48(sp)
-                lw      t5, 52(sp)
-                lw      t6, 56(sp)
-                lw      ra, 60(sp)
+    LOAD      a0, 0*REGBYTES(sp)
+    LOAD      a1, 1*REGBYTES(sp)
+    LOAD      a2, 2*REGBYTES(sp)
+    LOAD      a3, 3*REGBYTES(sp)
+    LOAD      a4, 4*REGBYTES(sp)
+    LOAD      a5, 5*REGBYTES(sp)
+    LOAD      a6, 6*REGBYTES(sp)
+    LOAD      a7, 7*REGBYTES(sp)
+    LOAD      t0, 8*REGBYTES(sp)
+    LOAD      t1, 9*REGBYTES(sp)
+    LOAD      t2, 10*REGBYTES(sp)
+    LOAD      t3, 11*REGBYTES(sp)
+    LOAD      t4, 12*REGBYTES(sp)
+    LOAD      t5, 13*REGBYTES(sp)
+    LOAD      t6, 14*REGBYTES(sp)
+    LOAD      ra, 15*REGBYTES(sp)
 
-                RESTORE_EPC_STATUS
+    RESTORE_EPC_STATUS
 
-                addi    sp, sp, 80
-                mret
+    addi    sp, sp, 80
+    mret
 
 #endif /* !defined(__DOXYGEN__) */
 
