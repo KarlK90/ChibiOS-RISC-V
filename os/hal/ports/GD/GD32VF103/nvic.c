@@ -55,7 +55,9 @@
  * @param[in] prio      the interrupt priority
  */
 void nvicEnableVector(uint32_t n, uint32_t prio) {
-  eclic_irq_enable(n, prio, 0);
+  eclic_set_irq_lvl_abs(n, prio);
+  eclic_set_level_trig(n);
+  eclic_enable_interrupt(n);
 }
 
 /**

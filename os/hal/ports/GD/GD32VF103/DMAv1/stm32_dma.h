@@ -71,7 +71,7 @@
  * @retval false        invalid DMA priority.
  * @retval true         correct DMA priority.
  */
-#define STM32_DMA_IS_VALID_PRIORITY(prio) (((prio) >= 12U) && ((prio) <= 15U))
+#define STM32_DMA_IS_VALID_PRIORITY(prio) (((prio) >= 0U) && ((prio) <= 3U))
 
 #if (STM32_DMA_SUPPORTS_DMAMUX == FALSE) || defined(_DOXYGEN__)
 /**

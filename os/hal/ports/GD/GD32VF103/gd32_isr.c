@@ -230,6 +230,7 @@ void irqInit(void) {
   // Initialize the 'ECLIC' interrupt controller.
   eclic_init(max_irqn);
   eclic_set_nlbits(ECLIC_PRIGROUP_LEVEL4_PRIO0);
+  eclic_global_interrupt_enable();
 
 #if HAL_USE_PAL
   nvicEnableVector(EXTI0_IRQn, STM32_IRQ_EXTI0_PRIORITY);
