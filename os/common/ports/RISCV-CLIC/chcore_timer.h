@@ -77,7 +77,7 @@ extern "C" {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void port_timer_start_alarm(systime_t time) {
+static inline void port_timer_start_alarm(systime_t time) {
 
   stStartAlarm(time);
 }
@@ -87,7 +87,7 @@ __attribute__((always_inline)) static inline void port_timer_start_alarm(systime
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void port_timer_stop_alarm(void) {
+static inline void port_timer_stop_alarm(void) {
 
   stStopAlarm();
 }
@@ -99,7 +99,7 @@ __attribute__((always_inline)) static inline void port_timer_stop_alarm(void) {
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline void port_timer_set_alarm(systime_t time) {
+static inline void port_timer_set_alarm(systime_t time) {
 
   stSetAlarm(time);
 }
@@ -111,7 +111,7 @@ __attribute__((always_inline)) static inline void port_timer_set_alarm(systime_t
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline systime_t port_timer_get_time(void) {
+static inline systime_t port_timer_get_time(void) {
 
   return stGetCounter();
 }
@@ -123,7 +123,7 @@ __attribute__((always_inline)) static inline systime_t port_timer_get_time(void)
  *
  * @notapi
  */
-__attribute__((always_inline)) static inline systime_t port_timer_get_alarm(void) {
+static inline systime_t port_timer_get_alarm(void) {
 
   return stGetAlarm();
 }

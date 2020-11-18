@@ -302,11 +302,11 @@ struct port_context {
  * @note    @p id can be a function name or a vector number depending on the
  *          port implementation.
  */
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 #define PORT_FAST_IRQ_HANDLER(id) extern "C" __attribute__((interrupt)) void id(void)
 #else
 #define PORT_FAST_IRQ_HANDLER(id) __attribute__((interrupt)) void id(void) 
-#endif
+#endif*/
 
 /**
  * @brief   Performs a context switch between two threads.
@@ -378,8 +378,8 @@ void _port_irq_epilogue(void);
 static inline void port_init(void) {
   // TODO mie is hardwired to zero, but the intention was that external
   // interrupts are enabled
-  /*uint32_t meie = 0x800;
-  RISCV_CSR_SET (mie, meie);*/
+  uint32_t meie = 0x800;
+  RISCV_CSR_SET (mie, meie);
   // RISCV_CSR_SET_I (mstatus, 0x8);
   // TODO mtimer irq aktiviern?
 }

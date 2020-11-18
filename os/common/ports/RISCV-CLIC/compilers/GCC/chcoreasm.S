@@ -246,7 +246,7 @@ _zombies:       j       _zombies
 .option pop
 .global _irq_handler
 _irq_handler:
-    addi    sp, sp, -80 //port_extctx
+    addi    sp, sp, -20*REGBYTES //port_extctx
 
     SAVE_EPC_STATUS
     
@@ -277,7 +277,11 @@ _irq_handler:
     DISABLE_MIE
 
     beq     a0, zero, _port_exit_from_isr
-    j       _port_switch_from_isr
+
+    la      a0, _port_switch_from_isr
+    csrw    mepc, a0
+
+    mret
 
 .global handle_trap
 .weak handle_trap
@@ -309,6 +313,13 @@ _port_switch_from_isr:
 
 .global _port_exit_from_isr
 _port_exit_from_isr:
+
+    RESTORE_EPC_STATUS
+    // Defer-enable interrupts using mpie with mret.
+    // Also force mpp to M-Mode.
+    li      a0, 0x1880
+    csrs    mstatus, a0
+
     LOAD      a0, 0*REGBYTES(sp)
     LOAD      a1, 1*REGBYTES(sp)
     LOAD      a2, 2*REGBYTES(sp)
@@ -326,9 +337,7 @@ _port_exit_from_isr:
     LOAD      t6, 14*REGBYTES(sp)
     LOAD      ra, 15*REGBYTES(sp)
 
-    RESTORE_EPC_STATUS
-
-    addi    sp, sp, 80
+    addi    sp, sp, 20*REGBYTES
     mret
 
 #endif /* !defined(__DOXYGEN__) */

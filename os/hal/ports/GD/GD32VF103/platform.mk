@@ -8,26 +8,26 @@ endif
 
 HALCONF := $(strip $(shell cat $(CONFDIR)/halconf.h | egrep -e "\#define"))
 
-PLATFORMSRC := ${CHIBIOS_RV}/os/hal/ports/common/RISCV/clic/hal_st_lld.c \
-               ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/hal_lld.c \
+#${CHIBIOS_RV}/os/hal/ports/common/RISCV/clic/hal_st_lld.c \
+
+PLATFORMSRC := ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/hal_lld.c \
                ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/n200_func.c \
                ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/gd32vf103_eclic.c \
                ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/nvic.c \
                ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/gd32_isr.c
 
 else
-PLATFORMSRC = ${CHIBIOS_RV}/os/hal/ports/common/RISCV/clic/hal_st_lld.c \
-              ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/hal_lld.c \
+PLATFORMSRC = ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/hal_lld.c \
               ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/n200_func.c \
               ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/gd32vf103_eclic.c \
               ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/nvic.c \
               ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/gd32_isr.c
 
 endif
+#${CHIBIOS_RV}/os/hal/ports/common/RISCV/clic
 
 # Required include directories
-PLATFORMINC = ${CHIBIOS_RV}/os/hal/ports/common/RISCV/clic \
-              ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103
+PLATFORMINC = ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103
 
 # Drivers compatible with the platform.
 include ${CHIBIOS_RV}/os/hal/ports/GD/GD32VF103/CANv1/driver.mk

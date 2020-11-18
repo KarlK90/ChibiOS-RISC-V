@@ -32,7 +32,8 @@
 /* Driver constants.                                                         */
 /*===========================================================================*/
 
-#define RISCV_MTIMECMP0 TIMER_REG64(TIMER_MTIMECMP)
+#define RISCV_MTIMECMP TIMER_REG64(TIMER_MTIMECMP)
+#define RISCV_MTIMECMP0 TIMER_REG(TIMER_MTIMECMP)
 #define RISCV_MTIMECMPH0 TIMER_REG(TIMER_MTIMECMP + 4)
 
 #define RISCV_MTIME TIMER_REG64(TIMER_MTIME)
@@ -113,7 +114,7 @@ static inline void st_lld_start_alarm(systime_t abstime) {
   eclic_enable_interrupt(CLIC_INT_TMR);
   eclic_set_level_trig(CLIC_INT_TMR);
   eclic_set_irq_priority(CLIC_INT_TMR, STM32_ST_IRQ_PRIORITY);
-  RISCV_MTIMECMP0 = abstime;
+  RISCV_MTIMECMP = abstime;
 }
 
 /**
@@ -123,7 +124,7 @@ static inline void st_lld_start_alarm(systime_t abstime) {
  */
 static inline void st_lld_stop_alarm(void) {
   eclic_disable_interrupt(CLIC_INT_TMR);
-  RISCV_MTIMECMP0 = (uint32_t)(~0);
+  RISCV_MTIMECMP = (uint64_t)(~0);
 }
 
 /**
@@ -134,7 +135,7 @@ static inline void st_lld_stop_alarm(void) {
  * @notapi
  */
 static inline void st_lld_set_alarm(systime_t abstime) {
-  RISCV_MTIMECMP0 = abstime;
+  RISCV_MTIMECMP = abstime;
 }
 
 /**
@@ -145,7 +146,7 @@ static inline void st_lld_set_alarm(systime_t abstime) {
  * @notapi
  */
 static inline systime_t st_lld_get_alarm(void) {
-  return (systime_t)RISCV_MTIMECMP0;
+  return (systime_t)RISCV_MTIMECMP;
 }
 
 /**
@@ -158,9 +159,7 @@ static inline systime_t st_lld_get_alarm(void) {
  * @notapi
  */
 static inline bool st_lld_is_alarm_active(void) {
-  // return (bool)(1);
-  // return false;//todo fix me
-  return eclic_is_pending(CLIC_INT_TMR);
+  return RISCV_MTIMECMP != (uint64_t)(~0);
 }
 
 #endif /* HAL_ST_LLD_H */

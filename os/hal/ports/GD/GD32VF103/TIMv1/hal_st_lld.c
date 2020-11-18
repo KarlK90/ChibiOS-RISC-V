@@ -330,7 +330,7 @@
 
 #if OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC
 
-#define ST_HANDLER                          SysTick_Handler
+#define ST_HANDLER                          INT_TMR
 
 #if defined(STM32_CORE_CK)
 #define SYSTICK_CK                          STM32_CORE_CK
@@ -434,12 +434,14 @@ void st_lld_init(void) {
 #if OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC
   /* Periodic systick mode, the Cortex-Mx internal systick timer is used
      in this mode.*/
-  SysTick->LOAD = (SYSTICK_CK / OSAL_ST_FREQUENCY) - 1;
+     RISCV_MTIMECMP = (SYSTICK_CK / OSAL_ST_FREQUENCY) - 1;
+     RISCV_MTIME = 0;
+  /*SysTick->LOAD = (SYSTICK_CK / OSAL_ST_FREQUENCY) - 1;
   SysTick->VAL = 0;
   SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
                   SysTick_CTRL_ENABLE_Msk |
                   SysTick_CTRL_TICKINT_Msk;
-
+*/
   /* IRQ enabled.*/
   nvicEnableVector(HANDLER_SYSTICK, STM32_ST_IRQ_PRIORITY);
 #endif /* OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC */
@@ -449,6 +451,11 @@ void st_lld_init(void) {
  * @brief   IRQ handling code.
  */
 void st_lld_serve_interrupt(void) {
+#if OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC
+  /* Reload Timer */
+  RISCV_MTIMECMP = (SYSTICK_CK / OSAL_ST_FREQUENCY) - 1;
+  RISCV_MTIME = 0;
+#endif
 #if OSAL_ST_MODE == OSAL_ST_MODE_FREERUNNING
   uint32_t sr;
   stm32_tim_t *timp = STM32_ST_TIM;

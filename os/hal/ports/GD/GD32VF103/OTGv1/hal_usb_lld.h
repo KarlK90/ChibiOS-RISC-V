@@ -74,14 +74,14 @@
  * @brief   OTG1 interrupt priority level setting.
  */
 #if !defined(STM32_USB_OTG1_IRQ_PRIORITY) || defined(__DOXYGEN__)
-#define STM32_USB_OTG1_IRQ_PRIORITY         14
+#define STM32_USB_OTG1_IRQ_PRIORITY         1
 #endif
 
 /**
  * @brief   OTG2 interrupt priority level setting.
  */
 #if !defined(STM32_USB_OTG2_IRQ_PRIORITY) || defined(__DOXYGEN__)
-#define STM32_USB_OTG2_IRQ_PRIORITY         14
+#define STM32_USB_OTG2_IRQ_PRIORITY         1
 #endif
 
 /**
@@ -89,7 +89,7 @@
  * @note    Must be a multiple of 4.
  */
 #if !defined(STM32_USB_OTG1_RX_FIFO_SIZE) || defined(__DOXYGEN__)
-#define STM32_USB_OTG1_RX_FIFO_SIZE         512
+#define STM32_USB_OTG1_RX_FIFO_SIZE         128
 #endif
 
 /**
@@ -221,22 +221,22 @@
 #error "OTG2 RX FIFO size must be a multiple of 4"
 #endif
 
-#if defined(STM32F2XX) || defined(STM32F4XX) || defined(STM32F7XX)
-#define STM32_USBCLK                        STM32_PLL48CLK
-#elif defined(STM32F10X_CL) || defined (STM32F10X_MD)
+/*#if defined(STM32F2XX) || defined(STM32F4XX) || defined(STM32F7XX)
+#define STM32_USBCLK                        STM32_PLL48CLK*/
+#if defined(STM32F10X_CL) || defined (STM32F10X_MD)
 #define STM32_USBCLK                        STM32_OTGFSCLK
-#elif defined(STM32L4XX) || defined(STM32L4XXP)
-#define STM32_USBCLK                        STM32_48CLK
-#elif  defined(STM32H7XX)
-/* Defines directly STM32_USBCLK.*/
-#define rccEnableOTG_FS                     rccEnableUSB2_OTG_HS
-#define rccDisableOTG_FS                    rccDisableUSB2_OTG_HS
-#define rccResetOTG_FS                      rccResetUSB2_OTG_HS
-#define rccEnableOTG_HS                     rccEnableUSB1_OTG_HS
-#define rccDisableOTG_HS                    rccDisableUSB1_OTG_HS
-#define rccResetOTG_HS                      rccResetUSB1_OTG_HS
-#define rccEnableOTG_HSULPI                 rccEnableUSB1_HSULPI
-#define rccDisableOTG_HSULPI                rccDisableUSB1_HSULPI
+// #elif defined(STM32L4XX) || defined(STM32L4XXP)
+// #define STM32_USBCLK                        STM32_48CLK
+// #elif  defined(STM32H7XX)
+// /* Defines directly STM32_USBCLK.*/
+// #define rccEnableOTG_FS                     rccEnableUSB2_OTG_HS
+// #define rccDisableOTG_FS                    rccDisableUSB2_OTG_HS
+// #define rccResetOTG_FS                      rccResetUSB2_OTG_HS
+// #define rccEnableOTG_HS                     rccEnableUSB1_OTG_HS
+// #define rccDisableOTG_HS                    rccDisableUSB1_OTG_HS
+// #define rccResetOTG_HS                      rccResetUSB1_OTG_HS
+// #define rccEnableOTG_HSULPI                 rccEnableUSB1_HSULPI
+// #define rccDisableOTG_HSULPI                rccDisableUSB1_HSULPI
 #else
 #error "unsupported STM32 platform for OTG functionality"
 #endif

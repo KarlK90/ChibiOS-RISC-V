@@ -35,18 +35,18 @@
  * @name System vectors numbers
  * @{
  */
-#define HANDLER_MEM_MANAGE 0  /**< MEM MANAGE vector id.          */
-#define HANDLER_BUS_FAULT 1   /**< BUS FAULT vector id.           */
-#define HANDLER_USAGE_FAULT 2 /**< USAGE FAULT vector id.         */
-#define HANDLER_RESERVED_3 3
-#define HANDLER_RESERVED_4 4
-#define HANDLER_RESERVED_5 5
-#define HANDLER_RESERVED_6 6
-#define HANDLER_SVCALL 7        /**< SVCALL vector id.              */
-#define HANDLER_DEBUG_MONITOR 8 /**< DEBUG MONITOR vector id.       */
-#define HANDLER_RESERVED_9 9
-#define HANDLER_PENDSV 10  /**< PENDSV vector id.              */
-#define HANDLER_SYSTICK 11 /**< SYS TCK vector id.             */
+// #define HANDLER_MEM_MANAGE 0  /**< MEM MANAGE vector id.          */
+// #define HANDLER_BUS_FAULT 1   /**< BUS FAULT vector id.           */
+// #define HANDLER_USAGE_FAULT 2 /**< USAGE FAULT vector id.         */
+// #define HANDLER_RESERVED_3 3
+// #define HANDLER_RESERVED_4 4
+// #define HANDLER_RESERVED_5 5
+// #define HANDLER_RESERVED_6 6
+// #define HANDLER_SVCALL 7        /**< SVCALL vector id.              */
+// #define HANDLER_DEBUG_MONITOR 8 /**< DEBUG MONITOR vector id.       */
+// #define HANDLER_RESERVED_9 9
+// #define HANDLER_PENDSV 10  /**< PENDSV vector id.              */
+#define HANDLER_SYSTICK 7 /**< SYS TCK vector id.             */
 /** @} */
 
 /*===========================================================================*/

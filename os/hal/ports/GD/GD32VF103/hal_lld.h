@@ -181,19 +181,12 @@
 /* Derived constants and error checks.                                       */
 /*===========================================================================*/
 
-#if defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL) ||                 \
-    defined(__DOXYGEN__)
-#include "hal_lld_f100.h"
-
-#elif defined(STM32F10X_LD) || defined(STM32F10X_MD) ||                     \
+#if defined(STM32F10X_LD) || defined(STM32F10X_MD) ||                     \
       defined(STM32F10X_HD) || defined(STM32F10X_XL) ||                     \
       defined(__DOXYGEN__)
 #include "hal_lld_f103.h"
-
-#elif defined(STM32F10X_CL) || defined(__DOXYGEN__)
-#include "hal_lld_f105_f107.h"
 #else
-#error "snrhatei"
+#error "Unknown Device"
 #endif
 
 /*===========================================================================*/
