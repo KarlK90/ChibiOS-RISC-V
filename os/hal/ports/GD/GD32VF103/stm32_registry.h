@@ -236,7 +236,7 @@
 #define STM32_OTG1_ENDPOINTS                3
 
 #define STM32_HAS_OTG2                      FALSE
-#define STM32_HAS_USB                       FALSE
+#define STM32_HAS_USB                       TRUE
 
 /* IWDG attributes.*/
 #define STM32_HAS_IWDG                      TRUE

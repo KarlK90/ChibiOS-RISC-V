@@ -43,7 +43,7 @@
 /**
  * @brief   Maximum system clock frequency.
  */
-#define STM32_SYSCLK_MAX        108000000
+#define STM32_SYSCLK_MAX        120000000
 
 /**
  * @brief   Maximum HSE clock frequency.
@@ -78,7 +78,7 @@
 /**
  * @brief   Maximum PLL output clock frequency.
  */
-#define STM32_PLLOUT_MAX        72000000
+#define STM32_PLLOUT_MAX        120000000
 
 /**
  * @brief   Minimum PLL output clock frequency.
@@ -144,6 +144,8 @@
 
 #define STM32_USBPRE_DIV1P5     (0 << 22)   /**< PLLOUT divided by 1.5.     */
 #define STM32_USBPRE_DIV1       (1 << 22)   /**< PLLOUT divided by 1.       */
+#define STM32_USBPRE_DIV2P5     (2 << 22)   /**< PLLOUT divided by 2.5.     */
+#define STM32_USBPRE_DIV2       (3 << 22)   /**< PLLOUT divided by 2.       */
 
 #define STM32_MCOSEL_NOCLOCK    (0 << 24)   /**< No clock on MCO pin.       */
 #define STM32_MCOSEL_SYSCLK     (4 << 24)   /**< SYSCLK on MCO pin.         */
@@ -566,6 +568,10 @@
 #define STM32_OTGFSCLK                ((STM32_PLLCLKOUT * 2) / 3)
 #elif (STM32_USBPRE == STM32_USBPRE_DIV1)
 #define STM32_OTGFSCLK                STM32_PLLCLKOUT
+#elif (STM32_USBPRE == STM32_USBPRE_DIV2)
+#define STM32_OTGFSCLK                STM32_PLLCLKOUT / 2
+#elif (STM32_USBPRE == STM32_USBPRE_DIV2P5)
+#define STM32_OTGFSCLK                ((STM32_PLLCLKOUT * 2) / 5)
 #else
 #error "invalid STM32_USBPRE value specified"
 #endif
