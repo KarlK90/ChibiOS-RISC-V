@@ -77,7 +77,7 @@
 /**
  * @brief   Name of the implemented architecture.
  */
-#define PORT_ARCHITECTURE_NAME "RISCV Architecture"
+#define PORT_ARCHITECTURE_NAME "RISC-V ECLIC Architecture"
 
 /**
  * @brief   Compiler name and version.
@@ -92,7 +92,7 @@
 /**
  * @brief   Port-specific information string.
  */
-#define PORT_INFO "no info"
+#define PORT_INFO "RV32IMAC"
 /** @} */
 
 /* Inclusion of the RISC-V implementation specific parameters.*/
@@ -378,8 +378,8 @@ void _port_irq_epilogue(void);
 static inline void port_init(void) {
   // TODO mie is hardwired to zero, but the intention was that external
   // interrupts are enabled
-  uint32_t meie = 0x800;
-  RISCV_CSR_SET (mie, meie);
+  //uint32_t meie = 0x800;
+  //RISCV_CSR_SET (mie, meie);
   // RISCV_CSR_SET_I (mstatus, 0x8);
   // TODO mtimer irq aktiviern?
 }

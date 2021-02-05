@@ -69,17 +69,7 @@
 #define PLATFORM_NAME           "STM32F10x Performance Line Low Density"
 
 #elif defined(STM32F10X_MD)
-#define PLATFORM_NAME           "STM32F10x Performance Line Medium Density"
-
-#elif defined(STM32F10X_HD)
-#define PLATFORM_NAME           "STM32F10x Performance Line High Density"
-
-#elif defined(STM32F10X_XL)
-#define PLATFORM_NAME           "STM32F10x Performance Line eXtra Density"
-
-#elif defined(STM32F10X_CL)
-#define PLATFORM_NAME           "STM32F10x Connectivity Line"
-
+#define PLATFORM_NAME           "GD32VF103 RISC-V"
 #else
 #error "unsupported or unrecognized STM32F1xx member"
 #endif

@@ -67,6 +67,12 @@
 #define CSR_PUSHMSUBM   0x7EB
 #define CSR_MMISC_CTL   0x7d0
 #define CSR_MSUBM       0x7c4
+/* === CLIC CSR Registers === */
+#define CSR_MNXTI               0x345
+#define CSR_MINTSTATUS          0x346
+#define CSR_MSCRATCHCSW         0x348
+#define CSR_MSCRATCHCSWL        0x349
+#define CSR_MCLICBASE           0x350
 
 #define MSTATUS_MIE     0x00000008
 
@@ -75,6 +81,8 @@
 .endm
 
 .macro SAVE_CONTEXT
+  csrrw sp, CSR_MSCRATCHCSWL, sp
+
   addi sp, sp, -20*REGBYTES
 
   STORE x1, 0*REGBYTES(sp)
@@ -116,6 +124,8 @@
   LOAD x31, 16*REGBYTES(sp)
   // De-allocate the stack space
   addi sp, sp, 20*REGBYTES
+
+  csrrw sp, CSR_MSCRATCHCSWL, sp
 .endm
 
 
@@ -242,7 +252,7 @@ _zombies:       j       _zombies
 .section .text.irq
 .option push
 .option norelax
-.align 2
+.align 4
 .option pop
 .global _irq_handler
 _irq_handler:
