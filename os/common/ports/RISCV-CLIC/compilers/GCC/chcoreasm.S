@@ -80,79 +80,112 @@
   csrc CSR_MSTATUS, MSTATUS_MIE
 .endm
 
+/**
+ * \brief  Macro for context save
+ * \details
+ * This macro save ABI defined caller saved registers in the stack.
+ * \remarks
+ * - This Macro could use to save context when you enter to interrupt
+ * or exception
+*/
+/* Save caller registers */
 .macro SAVE_CONTEXT
-  csrrw sp, CSR_MSCRATCHCSWL, sp
+    /* Allocate stack space for context saving */
+#ifndef __riscv_32e
+    addi sp, sp, -20*REGBYTES
+#else
+#error
+    addi sp, sp, -14*REGBYTES
+#endif /* __riscv_32e */
+    /* Store CSR mepc to stack using pushmepc */
+    csrrwi  x0, CSR_PUSHMEPC, 12
+    /* Store CSR mcause to stack using pushmcause */
+    csrrwi  x0, CSR_PUSHMCAUSE, 11
+    /* Store CSR msub to stack using pushmsub */
+    csrrwi  x0, CSR_PUSHMSUBM, 13
 
-  addi sp, sp, -20*REGBYTES
-
-  STORE x1, 0*REGBYTES(sp)
-  STORE x4, 1*REGBYTES(sp)
-  STORE x5, 2*REGBYTES(sp)
-  STORE x6, 3*REGBYTES(sp)
-  STORE x7, 4*REGBYTES(sp)
-  STORE x10, 5*REGBYTES(sp)
-  STORE x11, 6*REGBYTES(sp)
-  STORE x12, 7*REGBYTES(sp)
-  STORE x13, 8*REGBYTES(sp)
-  STORE x14, 9*REGBYTES(sp)
-  STORE x15, 10*REGBYTES(sp)
-  STORE x16, 11*REGBYTES(sp)
-  STORE x17, 12*REGBYTES(sp)
-  STORE x28, 13*REGBYTES(sp)
-  STORE x29, 14*REGBYTES(sp)
-  STORE x30, 15*REGBYTES(sp)
-  STORE x31, 16*REGBYTES(sp)
+    STORE x1, 0*REGBYTES(sp)
+    STORE x4, 1*REGBYTES(sp)
+    STORE x5, 2*REGBYTES(sp)
+    STORE x6, 3*REGBYTES(sp)
+    STORE x7, 4*REGBYTES(sp)
+    STORE x10, 5*REGBYTES(sp)
+    STORE x11, 6*REGBYTES(sp)
+    STORE x12, 7*REGBYTES(sp)
+    STORE x13, 8*REGBYTES(sp)
+    STORE x14, 9*REGBYTES(sp)
+    STORE x15, 10*REGBYTES(sp)
+#ifndef __riscv_32e
+    STORE x16, 14*REGBYTES(sp)
+    STORE x17, 15*REGBYTES(sp)
+    STORE x28, 16*REGBYTES(sp)
+    STORE x29, 17*REGBYTES(sp)
+    STORE x30, 18*REGBYTES(sp)
+    STORE x31, 19*REGBYTES(sp)
+#endif /* __riscv_32e */
 .endm
 
+/**
+ * \brief  Macro for restore caller registers
+ * \details
+ * This macro restore ABI defined caller saved registers from stack.
+ * \remarks
+ * - You could use this macro to restore context before you want return
+ * from interrupt or exeception
+ */
+/* Restore caller registers */
 .macro RESTORE_CONTEXT
-  LOAD x1, 0*REGBYTES(sp)
-  LOAD x4, 1*REGBYTES(sp)
-  LOAD x5, 2*REGBYTES(sp)
-  LOAD x6, 3*REGBYTES(sp)
-  LOAD x7, 4*REGBYTES(sp)
-  LOAD x10, 5*REGBYTES(sp)
-  LOAD x11, 6*REGBYTES(sp)
-  LOAD x12, 7*REGBYTES(sp)
-  LOAD x13, 8*REGBYTES(sp)
-  LOAD x14, 9*REGBYTES(sp)
-  LOAD x15, 10*REGBYTES(sp)
-  LOAD x16, 11*REGBYTES(sp)
-  LOAD x17, 12*REGBYTES(sp)
-  LOAD x28, 13*REGBYTES(sp)
-  LOAD x29, 14*REGBYTES(sp)
-  LOAD x30, 15*REGBYTES(sp)
-  LOAD x31, 16*REGBYTES(sp)
-  // De-allocate the stack space
-  addi sp, sp, 20*REGBYTES
+    LOAD x1, 0*REGBYTES(sp)
+    LOAD x4, 1*REGBYTES(sp)
+    LOAD x5, 2*REGBYTES(sp)
+    LOAD x6, 3*REGBYTES(sp)
+    LOAD x7, 4*REGBYTES(sp)
+    LOAD x10, 5*REGBYTES(sp)
+    LOAD x11, 6*REGBYTES(sp)
+    LOAD x12, 7*REGBYTES(sp)
+    LOAD x13, 8*REGBYTES(sp)
+    LOAD x14, 9*REGBYTES(sp)
+    LOAD x15, 10*REGBYTES(sp)
+#ifndef __riscv_32e
+    LOAD x16, 14*REGBYTES(sp)
+    LOAD x17, 15*REGBYTES(sp)
+    LOAD x28, 16*REGBYTES(sp)
+    LOAD x29, 17*REGBYTES(sp)
+    LOAD x30, 18*REGBYTES(sp)
+    LOAD x31, 19*REGBYTES(sp)
 
-  csrrw sp, CSR_MSCRATCHCSWL, sp
+    LOAD x5,  13*REGBYTES(sp)
+    csrw CSR_MSUBM, x5
+    LOAD x5,  12*REGBYTES(sp)
+    csrw CSR_MEPC, x5
+    LOAD x5,  11*REGBYTES(sp)
+    csrw CSR_MCAUSE, x5
+
+    /* De-allocate the stack space */
+    addi sp, sp, 20*REGBYTES
+#else
+#error
+    /* De-allocate the stack space */
+    addi sp, sp, 14*REGBYTES
+#endif /* __riscv_32e */
+
 .endm
 
-
-###############################################
-###############################################
-# Save the mepc and mstatus
-#
-.macro SAVE_EPC_STATUS
-  csrr x5, CSR_MEPC  
-  STORE x5,  16*REGBYTES(sp)
-  csrr x5, CSR_MSTATUS  
-  STORE x5,  17*REGBYTES(sp)
-  csrr x5, CSR_MSUBM  
-  STORE x5,  18*REGBYTES(sp)
+/**
+ * \brief  Macro for save necessary CSRs to stack
+ * \details
+ * This macro store MCAUSE, MEPC, MSUBM to stack.
+ */
+.macro SAVE_CSR_CONTEXT
 .endm
 
-###############################################
-###############################################
-# Restore the mepc and mstatus
-#
-.macro RESTORE_EPC_STATUS
-  LOAD x5,  16*REGBYTES(sp)
-  csrw CSR_MEPC, x5  
-  LOAD x5,  17*REGBYTES(sp)
-  csrw CSR_MSTATUS, x5  
-  LOAD x5,  18*REGBYTES(sp)
-  csrw CSR_MSUBM, x5  
+/**
+ * \brief  Macro for restore necessary CSRs from stack
+ * \details
+ * This macro restore MSUBM, MEPC, MCAUSE from stack.
+ */
+.macro RESTORE_CSR_CONTEXT
+
 .endm
 
 /*
@@ -163,21 +196,17 @@
 .option norelax
 .align 6
 .option pop
-.global _start_trap
+.globl _start_trap
     _start_trap:
     // Save the caller saving registers (context)
     SAVE_CONTEXT
-    // Save the MEPC/Mstatus/Msubm reg
-    SAVE_EPC_STATUS
 
-        // Set the function argument
+    // Set the function argument
     csrr a0, mcause
     mv a1, sp
-        // Call the function
+    // Call the function
     call handle_trap
 
-    // Restore the MEPC/Mstatus/Msubm reg
-    RESTORE_EPC_STATUS
     // Restore the caller saving registers (context)
     RESTORE_CONTEXT
 
@@ -190,8 +219,9 @@
  * Performs a context switch between two threads.
  * a0 = ntp, a1 = otp
  *--------------------------------------------------------------------------*/
-                .globl  _port_switch
+.globl  _port_switch
 _port_switch:
+
     STORE      ra, -13*REGBYTES(sp) //port_intctx
     STORE      s0, -12*REGBYTES(sp)
     STORE      s1, -11*REGBYTES(sp)
@@ -248,35 +278,17 @@ _port_thread_start:
     jal     ra, chThdExit
 _zombies:       j       _zombies
 
+
 // IRQ entry point
 .section .text.irq
 .option push
 .option norelax
 .align 4
 .option pop
-.global _irq_handler
+.globl _irq_handler
 _irq_handler:
-    addi    sp, sp, -20*REGBYTES //port_extctx
-
-    SAVE_EPC_STATUS
-    
-    // alle caller save register auf dem stack speichern, eqvlt. zu SAVE_CONTEXT exkl. tp register
-    STORE      a0, 0*REGBYTES(sp)
-    STORE      a1, 1*REGBYTES(sp)
-    STORE      a2, 2*REGBYTES(sp)
-    STORE      a3, 3*REGBYTES(sp)
-    STORE      a4, 4*REGBYTES(sp)
-    STORE      a5, 5*REGBYTES(sp)
-    STORE      a6, 6*REGBYTES(sp)
-    STORE      a7, 7*REGBYTES(sp)
-    STORE      t0, 8*REGBYTES(sp)
-    STORE      t1, 9*REGBYTES(sp)
-    STORE      t2, 10*REGBYTES(sp)
-    STORE      t3, 11*REGBYTES(sp)
-    STORE      t4, 12*REGBYTES(sp)
-    STORE      t5, 13*REGBYTES(sp)
-    STORE      t6, 14*REGBYTES(sp)
-    STORE      ra, 15*REGBYTES(sp)
+    // alle caller save register auf dem stack speichern, eqvlt.
+    SAVE_CONTEXT
 
     // The special CSR read/write operation, which is actually Claim the CLIC to
     // find its pending highest ID, if the ID is not 0, then automatically enable
@@ -293,7 +305,7 @@ _irq_handler:
 
     mret
 
-.global handle_trap
+.globl handle_trap
 .weak handle_trap
 handle_trap:
     j handle_trap  # jump to handle_trap
@@ -305,7 +317,7 @@ handle_trap:
  *--------------------------------------------------------------------------*/
 
 // context switch in dem der neue programm counter in mepc geschrieben wird
-.global _port_switch_from_isr
+.globl _port_switch_from_isr
 _port_switch_from_isr:
 #if CH_DBG_STATISTICS
     jal     ra, _stats_start_measure_crit_thd
@@ -321,33 +333,14 @@ _port_switch_from_isr:
     jal     ra, _stats_stop_measure_crit_thd
 #endif
 
-.global _port_exit_from_isr
+ // li      a0, 0x1880
+ // csrs    mstatus, a0
+
+.globl _port_exit_from_isr
 _port_exit_from_isr:
 
-    RESTORE_EPC_STATUS
-    // Defer-enable interrupts using mpie with mret.
-    // Also force mpp to M-Mode.
-    li      a0, 0x1880
-    csrs    mstatus, a0
+RESTORE_CONTEXT
 
-    LOAD      a0, 0*REGBYTES(sp)
-    LOAD      a1, 1*REGBYTES(sp)
-    LOAD      a2, 2*REGBYTES(sp)
-    LOAD      a3, 3*REGBYTES(sp)
-    LOAD      a4, 4*REGBYTES(sp)
-    LOAD      a5, 5*REGBYTES(sp)
-    LOAD      a6, 6*REGBYTES(sp)
-    LOAD      a7, 7*REGBYTES(sp)
-    LOAD      t0, 8*REGBYTES(sp)
-    LOAD      t1, 9*REGBYTES(sp)
-    LOAD      t2, 10*REGBYTES(sp)
-    LOAD      t3, 11*REGBYTES(sp)
-    LOAD      t4, 12*REGBYTES(sp)
-    LOAD      t5, 13*REGBYTES(sp)
-    LOAD      t6, 14*REGBYTES(sp)
-    LOAD      ra, 15*REGBYTES(sp)
-
-    addi    sp, sp, 20*REGBYTES
     mret
 
 #endif /* !defined(__DOXYGEN__) */

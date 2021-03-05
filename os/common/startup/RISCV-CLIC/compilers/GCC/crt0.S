@@ -136,48 +136,25 @@
 .text
 .global _start
 _start:
-  
-  #ifdef STM32_BOOTLOADER_ADDRESS
-  /* jump to bootloader code */
-  la         t0, (__ram0_end__)-4
-  lw         t2, t0
-  sw         zero, (__ram0_end__)-4/* erase stored magic */
-  li         t1, MAGIC_BOOTLOADER_NUMBER
-  //cmp        r2, r1
-  beq        t1, t2, Bootloader_Jump
-  #endif /* STM32_BOOTLOADER_ADDRESS */
-
-  /* save some power by disabling these counters */
-	//csrs	CSR_MCOUNTINHIBIT, CSR_MCOUNTINHIBIT_IR | CSR_MCOUNTINHIBIT_CY
-	/* the gd32vf103 has its flash at 0x08000000, but also mapped to 0,
-	 * but if the pc is in a different range from where the code is linked
-	 * things break, so jump to the absolute address of _crt0_entry */
-	lui	ra, %hi(_crt0_entry)
-	jr %lo(_crt0_entry)(ra)
-
-#ifdef STM32_BOOTLOADER_ADDRESS
-/*
- * Jump-to-bootloader function.
-*/
-
-Bootloader_Jump:
-                la      t0, STM32_BOOTLOADER_ADDRESS
-                lw      sp, t0
-               // mov     sp, r1
-                addi     t0,t0, 4
-                jalr      t0
-#endif /* STM32_BOOTLOADER_ADDRESS */
-
+                /* ===== Startup Stage 1 ===== */
+                /* Disable Global Interrupt */
+                csrc CSR_MSTATUS, MSTATUS_MIE
+                /* Jump to logical address first to ensure correct operation of RAM region  */
+                la      a0, _start
+                li      a1, 1
+                slli    a1, a1, 29
+                bleu    a1, a0, _crt0_entry
+                srli    a1, a1, 2
+                bleu    a1, a0, _crt0_entry
+                la      a0, _crt0_entry
+                add     a0, a0, a1
+                jr      a0
 
 /*
  * CRT0 entry point.
  */
-                .global _crt0_entry
+.global _crt0_entry
 _crt0_entry:
-                /* ===== Startup Stage 1 ===== */
-                /* Disable Global Interrupt */
-                csrc CSR_MSTATUS, MSTATUS_MIE
-
                 /* Initialize GP and Stack Pointer SP */
                 .option push
                 .option norelax
