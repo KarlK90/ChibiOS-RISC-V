@@ -1,5 +1,5 @@
 /*
-    ChibiOS - Copyright (C) 2020 Patrick Seidel.
+    ChibiOS - Copyright (C) 2021 Stefan Kerkmann.
 
     This file is part of ChibiOS.
 
@@ -109,7 +109,7 @@
  *          by @p PORT_INT_REQUIRED_STACK.
  */
 #if !defined(PORT_IDLE_THREAD_STACK_SIZE) || defined(__DOXYGEN__)
-#define PORT_IDLE_THREAD_STACK_SIZE     32
+#define PORT_IDLE_THREAD_STACK_SIZE 512
 #endif
 
 /**
@@ -118,7 +118,7 @@
  *          area size.
  */
 #if !defined(PORT_INT_REQUIRED_STACK) || defined(__DOXYGEN__)
-#define PORT_INT_REQUIRED_STACK 256
+#define PORT_INT_REQUIRED_STACK 1024
 #endif
 
 /**
@@ -238,7 +238,6 @@ struct port_context {
     (tp)->ctx.sp->ra = (uint32_t)_port_thread_start;                           \
     (tp)->ctx.sp->s0 = (uint32_t)(pf);                                         \
     (tp)->ctx.sp->s1 = (uint32_t)(arg);                                        \
-    (tp)->ctx.sp = (struct port_intctx *)(wtop);                               \
   }
 
 /**
@@ -282,9 +281,7 @@ struct port_context {
  * @details This macro must be inserted at the end of all IRQ handlers
  *          enabled to invoke system APIs.
  */
-#define PORT_IRQ_EPILOGUE()                                                    \
-  __riscv_in_isr = false;                                                      \
-  return chSchIsPreemptionRequired();
+#define PORT_IRQ_EPILOGUE() return _port_irq_epilogue();
 
 /**
  * @brief   IRQ handler function declaration.
@@ -303,10 +300,9 @@ struct port_context {
  *          port implementation.
  */
 /*#ifdef __cplusplus
-#define PORT_FAST_IRQ_HANDLER(id) extern "C" __attribute__((interrupt)) void id(void)
-#else
-#define PORT_FAST_IRQ_HANDLER(id) __attribute__((interrupt)) void id(void) 
-#endif*/
+#define PORT_FAST_IRQ_HANDLER(id) extern "C" __attribute__((interrupt)) void
+id(void) #else #define PORT_FAST_IRQ_HANDLER(id) __attribute__((interrupt)) void
+id(void) #endif*/
 
 /**
  * @brief   Performs a context switch between two threads.
@@ -324,8 +320,9 @@ struct port_context {
 #define port_switch(ntp, otp)                                                  \
   {                                                                            \
     register struct port_intctx *sp asm("%sp");                                \
-    if ((stkalign_t *)(sp - 1) < otp->wabase)                                  \
-      chSysHalt("stack overflow");                                             \
+    if ((stkalign_t *)(sp - 1) < otp->wabase) {                                \
+      chSysHalt("stackoverflow");                                              \
+    }                                                                          \
     _port_switch(ntp, otp);                                                    \
   }
 #endif
@@ -357,7 +354,7 @@ void _port_switch_after_isr(void);
 void _port_switch_from_isr(void);
 void _port_exit_from_isr(void);
 void _port_thread_start(void);
-void _port_irq_epilogue(void);
+bool _port_irq_epilogue(void);
 #ifdef __cplusplus
 }
 #endif
@@ -378,10 +375,6 @@ void _port_irq_epilogue(void);
 static inline void port_init(void) {
   // TODO mie is hardwired to zero, but the intention was that external
   // interrupts are enabled
-  //uint32_t meie = 0x800;
-  //RISCV_CSR_SET (mie, meie);
-  // RISCV_CSR_SET_I (mstatus, 0x8);
-  // TODO mtimer irq aktiviern?
 }
 
 /**
@@ -440,7 +433,7 @@ static inline void port_unlock(void) { RISCV_CSR_SET_I(mstatus, 0x8); }
  *          interrupt handlers. The implementation is architecture dependent,
  *          in its simplest form it is void.
  */
-static inline void port_lock_from_isr(void) {  }
+static inline void port_lock_from_isr(void) {}
 
 /**
  * @brief   Kernel-unlock action from an interrupt handler.
@@ -448,7 +441,7 @@ static inline void port_lock_from_isr(void) {  }
  *          handlers. The implementation is architecture dependent, in its
  *          simplest form it is void.
  */
-static inline void port_unlock_from_isr(void) {  }
+static inline void port_unlock_from_isr(void) {}
 
 /**
  * @brief   Disables all the interrupt sources.

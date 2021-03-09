@@ -1,5 +1,5 @@
 /*
-    ChibiOS - Copyright (C) 2020 Patrick Seidel.
+    ChibiOS - Copyright (C) 2021 Stefan Kerkmann.
 
     This file is part of ChibiOS.
 
@@ -37,6 +37,7 @@
 #include "chlicense.h"
 #include "chconf.h"
 #include "chcore.h"
+#include "riscv_encoding.h"
 
 #if !defined(__DOXYGEN__)
 
@@ -55,26 +56,6 @@
 #define LOAD     lw
 #define LOG_REGBYTES 2
 #define REGBYTES (1 << LOG_REGBYTES)
-
-#define CSR_MSTATUS     0x300
-#define CSR_MTVT        0x307
-#define CSR_MEPC        0x341
-#define CSR_MCAUSE      0x342
-#define CSR_MTVT2       0x7EC
-#define CSR_JALMNXTI    0x7ED
-#define CSR_PUSHMCAUSE  0x7EE
-#define CSR_PUSHMEPC    0x7EF
-#define CSR_PUSHMSUBM   0x7EB
-#define CSR_MMISC_CTL   0x7d0
-#define CSR_MSUBM       0x7c4
-/* === CLIC CSR Registers === */
-#define CSR_MNXTI               0x345
-#define CSR_MINTSTATUS          0x346
-#define CSR_MSCRATCHCSW         0x348
-#define CSR_MSCRATCHCSWL        0x349
-#define CSR_MCLICBASE           0x350
-
-#define MSTATUS_MIE     0x00000008
 
 .macro DISABLE_MIE
   csrc CSR_MSTATUS, MSTATUS_MIE
@@ -161,32 +142,15 @@
     LOAD x5,  11*REGBYTES(sp)
     csrw CSR_MCAUSE, x5
 
-    /* De-allocate the stack space */
+    # De-allocate the stack space
     addi sp, sp, 20*REGBYTES
 #else
-#error
-    /* De-allocate the stack space */
+    # De-allocate the stack space
     addi sp, sp, 14*REGBYTES
 #endif /* __riscv_32e */
 
 .endm
 
-/**
- * \brief  Macro for save necessary CSRs to stack
- * \details
- * This macro store MCAUSE, MEPC, MSUBM to stack.
- */
-.macro SAVE_CSR_CONTEXT
-.endm
-
-/**
- * \brief  Macro for restore necessary CSRs from stack
- * \details
- * This macro restore MSUBM, MEPC, MCAUSE from stack.
- */
-.macro RESTORE_CSR_CONTEXT
-
-.endm
 
 /*
     Trap entry point (_start_trap)
@@ -198,60 +162,80 @@
 .option pop
 .globl _start_trap
     _start_trap:
-    // Save the caller saving registers (context)
+    # Save the caller saving registers (context)
     SAVE_CONTEXT
 
-    // Set the function argument
+    # Set the function argument
     csrr a0, mcause
     mv a1, sp
-    // Call the function
+    # Call the function
     call handle_trap
 
-    // Restore the caller saving registers (context)
+    # Restore the caller saving registers (context)
     RESTORE_CONTEXT
 
-    // De-allocate the stack space
-    // addi sp, sp, 19*REGBYTES
-    // Return to regular code
+    # De-allocate the stack space
+    # addi sp, sp, 19*REGBYTES
+    # Return to regular code
     mret
 
 /*--------------------------------------------------------------------------*
  * Performs a context switch between two threads.
  * a0 = ntp, a1 = otp
  *--------------------------------------------------------------------------*/
+.option push
+.option norelax
+.align 4
+.option pop
 .globl  _port_switch
+.type _port_switch,@function
 _port_switch:
+    # OLD THREAD CONTEXT SAVE BEGIN
+    # Allocate space for port_intctx structure on the threading stack
+    addi sp, sp, -13*REGBYTES
+    
+    # Store callee save registers
+    STORE      ra, 0*REGBYTES(sp) 
+    STORE      s0, 1*REGBYTES(sp)
+    STORE      s1, 2*REGBYTES(sp)
+    STORE      s2, 3*REGBYTES(sp)
+    STORE      s3,  4*REGBYTES(sp)
+    STORE      s4,  5*REGBYTES(sp)
+    STORE      s5,  6*REGBYTES(sp)
+    STORE      s6,  7*REGBYTES(sp)
+    STORE      s7,  8*REGBYTES(sp)
+    STORE      s8,  9*REGBYTES(sp)
+    STORE      s9,  10*REGBYTES(sp)
+    STORE      s10, 11*REGBYTES(sp)
+    STORE      s11, 12*REGBYTES(sp)
 
-    STORE      ra, -13*REGBYTES(sp) //port_intctx
-    STORE      s0, -12*REGBYTES(sp)
-    STORE      s1, -11*REGBYTES(sp)
-    STORE      s2, -10*REGBYTES(sp)
-    STORE      s3,  -9*REGBYTES(sp)
-    STORE      s4,  -8*REGBYTES(sp)
-    STORE      s5,  -7*REGBYTES(sp)
-    STORE      s6,  -6*REGBYTES(sp)
-    STORE      s7,  -5*REGBYTES(sp)
-    STORE      s8,  -4*REGBYTES(sp)
-    STORE      s9,  -3*REGBYTES(sp)
-    STORE      s10, -2*REGBYTES(sp)
-    STORE      s11, -1*REGBYTES(sp)
-
+    # Store stackpointer in otp->ctx
     STORE      sp, CONTEXT_OFFSET(a1)
+    # OLD THREAD CONTEXT SAVE END
+
+    # NEW THREAD CONTEXT RESTORE BEGIN
+    # Load stackpointer from ntp->ctx
     LOAD       sp, CONTEXT_OFFSET(a0)
 
-    LOAD      ra, -13*REGBYTES(sp)
-    LOAD      s0, -12*REGBYTES(sp)
-    LOAD      s1, -11*REGBYTES(sp)
-    LOAD      s2, -10*REGBYTES(sp)
-    LOAD      s3,  -9*REGBYTES(sp)
-    LOAD      s4,  -8*REGBYTES(sp)
-    LOAD      s5,  -7*REGBYTES(sp)
-    LOAD      s6,  -6*REGBYTES(sp)
-    LOAD      s7,  -5*REGBYTES(sp)
-    LOAD      s8,  -4*REGBYTES(sp)
-    LOAD      s9,  -3*REGBYTES(sp)
-    LOAD      s10, -2*REGBYTES(sp)
-    LOAD      s11, -1*REGBYTES(sp)
+    LOAD      ra, 0*REGBYTES(sp)
+    LOAD      s0, 1*REGBYTES(sp)
+    LOAD      s1, 2*REGBYTES(sp)
+    LOAD      s2, 3*REGBYTES(sp)
+    LOAD      s3,  4*REGBYTES(sp)
+    LOAD      s4,  5*REGBYTES(sp)
+    LOAD      s5,  6*REGBYTES(sp)
+    LOAD      s6,  7*REGBYTES(sp)
+    LOAD      s7,  8*REGBYTES(sp)
+    LOAD      s8,  9*REGBYTES(sp)
+    LOAD      s9,  10*REGBYTES(sp)
+    LOAD      s10, 11*REGBYTES(sp)
+    LOAD      s11, 12*REGBYTES(sp)
+
+    # De-allocate space on the threading stack
+    addi sp, sp, 13*REGBYTES
+    # NEW THREAD CONTEXT RESTORE END
+    
+    # Jump to return address loaded into ra
     ret
 
 /*--------------------------------------------------------------------------*
@@ -279,7 +263,7 @@ _port_thread_start:
 _zombies:       j       _zombies
 
 
-// IRQ entry point
+# IRQ entry point
 .section .text.irq
 .option push
 .option norelax
@@ -287,36 +271,39 @@ _zombies:       j       _zombies
 .option pop
 .globl _irq_handler
 _irq_handler:
-    // alle caller save register auf dem stack speichern, eqvlt.
+    # Save all caller registers and csr registers on the thread stack
     SAVE_CONTEXT
 
-    // The special CSR read/write operation, which is actually Claim the CLIC to
-    // find its pending highest ID, if the ID is not 0, then automatically enable
-    // the mstatus.MIE, and jump to its vector-entry-label, and update the link register.
-    csrrw ra, CSR_JALMNXTI, ra
+    # The special CSR read/write operation, which is actually Claim the CLIC to
+    # find its pending highest ID, if the ID is not 0, then automatically enable
+    # the mstatus.MIE, and jump to its vector-entry-label, and update the link register.
+    csrrw   ra, CSR_JALMNXTI, ra
     
-    // Critical Section Disable Interrupts Globaly
+    # Critical Section Disable Interrupts Globaly
     DISABLE_MIE
 
+    # No reschedule is necessary, just restore irq context and exit machine mode.
     beq     a0, zero, _port_exit_from_isr
 
-    la      a0, _port_switch_from_isr
-    csrw    mepc, a0
+    # Load pre-empted programm counter as return address, which is saved on context switching 
+    # and executed the next time this thread is scheduled.
+    csrr    ra, mepc
 
-    mret
+    # Simple jump, do not leave machine mode at this point.
+    # The next scheduled thread leaves at the end of _port_exit_from_isr.
+    j       _port_switch_from_isr
+
 
 .globl handle_trap
 .weak handle_trap
 handle_trap:
-    j handle_trap  # jump to handle_trap
+    j       handle_trap  # jump to handle_trap
 
 /*--------------------------------------------------------------------------*
  * Post-IRQ switch code.
  *
  * Exception handlers return here for context switching.
  *--------------------------------------------------------------------------*/
-
-// context switch in dem der neue programm counter in mepc geschrieben wird
 .globl _port_switch_from_isr
 _port_switch_from_isr:
 #if CH_DBG_STATISTICS
@@ -325,6 +312,7 @@ _port_switch_from_isr:
 #if CH_DBG_SYSTEM_STATE_CHECK
     jal     ra, _dbg_check_lock
 #endif
+    # Calls _port_switch at the end of the function
     jal     ra, chSchDoReschedule
 #if CH_DBG_SYSTEM_STATE_CHECK
     jal     ra, _dbg_check_unlock
@@ -332,15 +320,13 @@ _port_switch_from_isr:
 #if CH_DBG_STATISTICS
     jal     ra, _stats_stop_measure_crit_thd
 #endif
-
- // li      a0, 0x1880
- // csrs    mstatus, a0
-
+    
 .globl _port_exit_from_isr
 _port_exit_from_isr:
+    # Restore caller registers and csr registers from the thread stack
+    RESTORE_CONTEXT
 
-RESTORE_CONTEXT
-
+    # Leave machine mode and return to address stored in mepc 
     mret
 
 #endif /* !defined(__DOXYGEN__) */

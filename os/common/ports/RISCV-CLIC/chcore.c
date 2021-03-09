@@ -1,5 +1,5 @@
 /*
-    ChibiOS - Copyright (C) 2020 Patrick Seidel.
+    ChibiOS - Copyright (C) 2021 Stefan Kerkmann.
 
     This file is part of ChibiOS.
 
@@ -54,5 +54,16 @@ bool __riscv_in_isr;
 /*===========================================================================*/
 /* Module exported functions.                                                */
 /*===========================================================================*/
+#define CSR_MSUBM 0x7c4
+
+bool _port_irq_epilogue() {
+  __riscv_in_isr = false;
+
+  uint32_t m_subm;
+  RISCV_CSR_READ(m_subm, 0x7c4);
+
+  // Only re-scheduele if this interrupt is at the tail of a possible interrupt chain.
+  return ((m_subm & 0x300) == 0) && chSchIsPreemptionRequired();
+}
 
 /** @} */
