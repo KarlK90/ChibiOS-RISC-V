@@ -97,6 +97,7 @@
 
 /* Inclusion of the RISC-V implementation specific parameters.*/
 #include "riscvparams.h"
+#include "riscv_encoding.h"
 
 /*===========================================================================*/
 /* Module pre-compile time settings.                                         */
@@ -418,14 +419,14 @@ static inline bool port_is_isr_context(void) { return __riscv_in_isr; }
  * @details Usually this function just disables interrupts but may perform more
  *          actions.
  */
-static inline void port_lock(void) { RISCV_CSR_CLEAR_I(mstatus, 0x8); }
+static inline void port_lock(void) { clear_csr(mstatus, MSTATUS_MIE); }
 
 /**
  * @brief   Kernel-unlock action.
  * @details Usually this function just enables interrupts but may perform more
  *          actions.
  */
-static inline void port_unlock(void) { RISCV_CSR_SET_I(mstatus, 0x8); }
+static inline void port_unlock(void) { set_csr(mstatus, MSTATUS_MIE); }
 
 /**
  * @brief   Kernel-lock action from an interrupt handler.
@@ -447,22 +448,18 @@ static inline void port_unlock_from_isr(void) {}
  * @brief   Disables all the interrupt sources.
  * @note    Of course non-maskable interrupt sources are not included.
  */
-static inline void port_disable(void) { RISCV_CSR_CLEAR_I(mstatus, 0x8); }
+static inline void port_disable(void) { clear_csr(mstatus, MSTATUS_MIE); }
 
 /**
  * @brief   Disables the interrupt sources below kernel-level priority.
  * @note    Interrupt sources above kernel level remains enabled.
  */
-static inline void port_suspend(void) {
-
-  // TODO: Prioritized mask?
-  RISCV_CSR_CLEAR_I(mstatus, 0x8);
-}
+static inline void port_suspend(void) { clear_csr(mstatus, MSTATUS_MIE); }
 
 /**
  * @brief   Enables all the interrupt sources.
  */
-static inline void port_enable(void) { RISCV_CSR_SET_I(mstatus, 0x8); }
+static inline void port_enable(void) { set_csr(mstatus, MSTATUS_MIE); }
 
 /**
  * @brief   Enters an architecture-dependent IRQ-waiting mode.

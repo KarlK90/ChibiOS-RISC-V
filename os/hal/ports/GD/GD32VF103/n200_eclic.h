@@ -3,7 +3,7 @@
 #ifndef N200_ECLIC_H
 #define N200_ECLIC_H
 
-#include <riscv_const.h>
+#include <riscv_bits.h>
 
 #define ECLICINTCTLBITS  4
 

@@ -13,7 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -58,9 +58,22 @@
 #define REGBYTES (1 << LOG_REGBYTES)
 
 .macro DISABLE_MIE
-  csrc CSR_MSTATUS, MSTATUS_MIE
+    csrc CSR_MSTATUS, MSTATUS_MIE
 .endm
 
+.macro ENABLE_MIE
+    csrs CSR_MSTATUS, MSTATUS_MIE
+.endm
+
+.macro DISABLE_MPIE
+    li a0, MSTATUS_MPIE
+    csrc CSR_MSTATUS, a0
+.endm
+
+.macro ENABLE_MPIE
+    li a0, MSTATUS_MPIE
+    csrs CSR_MSTATUS, a0
+.endm
 /**
  * \brief  Macro for context save
  * \details
@@ -168,14 +181,15 @@
     # Set the function argument
     csrr a0, mcause
     mv a1, sp
+    csrr a2, CSR_MDCAUSE
+    csrr a3, CSR_MSUBM
+
     # Call the function
     call handle_trap
 
     # Restore the caller saving registers (context)
     RESTORE_CONTEXT
 
-    # De-allocate the stack space
-    # addi sp, sp, 19*REGBYTES
     # Return to regular code
     mret
 
@@ -193,9 +207,9 @@ _port_switch:
     # OLD THREAD CONTEXT SAVE BEGIN
     # Allocate space for port_intctx structure on the threading stack
     addi sp, sp, -13*REGBYTES
-    
+
     # Store callee save registers
-    STORE      ra, 0*REGBYTES(sp) 
+    STORE      ra, 0*REGBYTES(sp)
     STORE      s0, 1*REGBYTES(sp)
     STORE      s1, 2*REGBYTES(sp)
     STORE      s2, 3*REGBYTES(sp)
@@ -234,7 +248,7 @@ _port_switch:
     # De-allocate space on the threading stack
     addi sp, sp, 13*REGBYTES
     # NEW THREAD CONTEXT RESTORE END
-    
+
     # Jump to return address loaded into ra
     ret
 
@@ -278,20 +292,22 @@ _irq_handler:
     # find its pending highest ID, if the ID is not 0, then automatically enable
     # the mstatus.MIE, and jump to its vector-entry-label, and update the link register.
     csrrw   ra, CSR_JALMNXTI, ra
-    
+
     # Critical Section Disable Interrupts Globaly
     DISABLE_MIE
 
     # No reschedule is necessary, just restore irq context and exit machine mode.
     beq     a0, zero, _port_exit_from_isr
 
-    # Load pre-empted programm counter as return address, which is saved on context switching 
-    # and executed the next time this thread is scheduled.
-    csrr    ra, mepc
+    # Context switch is necessary, load switching routine into mepc
+    la      a0, _port_switch_from_isr
+    csrw    mepc, a0
 
-    # Simple jump, do not leave machine mode at this point.
-    # The next scheduled thread leaves at the end of _port_exit_from_isr.
-    j       _port_switch_from_isr
+    # Context switch is a critical section, so disable interrupts on return.
+    DISABLE_MPIE
+
+    mret
+
 
 
 .globl handle_trap
@@ -320,13 +336,16 @@ _port_switch_from_isr:
 #if CH_DBG_STATISTICS
     jal     ra, _stats_stop_measure_crit_thd
 #endif
-    
+
+    # Enable interrupts after leaving the interrupt handler
+    ENABLE_MPIE
+
 .globl _port_exit_from_isr
 _port_exit_from_isr:
     # Restore caller registers and csr registers from the thread stack
     RESTORE_CONTEXT
 
-    # Leave machine mode and return to address stored in mepc 
+    # Leave machine mode and return to address stored in mepc
     mret
 
 #endif /* !defined(__DOXYGEN__) */
